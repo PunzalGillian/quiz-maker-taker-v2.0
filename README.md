@@ -20,7 +20,6 @@ multiple-choice questions, and result tracking — all in a clean, responsive in
 **Frontend:**
 - React + Vite
 - TailwindCSS
-- React Router
 - Deployed via **Netlify**
 
 **Backend:**
