@@ -2,10 +2,114 @@ import React, { useState } from "react";
 import bg from "/src/assets/bg.png";
 import "../index.css";
 
-const apiUrl =
-  window.ENV?.VITE_API_URL ||
-  import.meta.env.VITE_API_URL ||
-  "https://quiz-maker-taker-v2-0.onrender.com/";
+const apiUrl = "https://quiz-maker-taker-v2-0.onrender.com";
+console.log("Sending request to:", `${apiUrl}/quizzes/`);
+
+// Reusable Input Component
+const InputField = ({
+  label,
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+  required = true,
+}) => {
+  return (
+    <>
+      <p className="mb-1">{label}:</p>
+      <input
+        type={type}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        className="w-full px-4 py-2.5 mb-3 rounded-md border border-gray-300 bg-[#EFEFEF]"
+        required={required}
+      />
+    </>
+  );
+};
+
+// Message Component for Success and Error Messages
+const Message = ({ type, message }) => {
+  const styles =
+    type === "success"
+      ? "bg-green-100 border-green-400 text-green-700"
+      : "bg-red-100 border-red-400 text-red-700";
+
+  return (
+    <div className={`${styles} border px-4 py-3 rounded relative mb-4`}>
+      {message}
+    </div>
+  );
+};
+
+// Question Form Component
+const QuestionForm = ({ question, questionIndex, handleQuestionChange }) => (
+  <div className="mb-6 p-4 bg-white/50 rounded-lg border border-gray-200">
+    <h2 className="font-semibold mb-3">Question {questionIndex + 1}</h2>
+
+    <InputField
+      label="Question Text"
+      value={question.question}
+      onChange={(e) =>
+        handleQuestionChange(questionIndex, "question", e.target.value)
+      }
+      placeholder="Enter a Question"
+    />
+
+    <InputField
+      label="Option A"
+      value={question.option_a}
+      onChange={(e) =>
+        handleQuestionChange(questionIndex, "option_a", e.target.value)
+      }
+      placeholder="Enter Option A"
+    />
+
+    <InputField
+      label="Option B"
+      value={question.option_b}
+      onChange={(e) =>
+        handleQuestionChange(questionIndex, "option_b", e.target.value)
+      }
+      placeholder="Enter Option B"
+    />
+
+    <InputField
+      label="Option C"
+      value={question.option_c}
+      onChange={(e) =>
+        handleQuestionChange(questionIndex, "option_c", e.target.value)
+      }
+      placeholder="Enter Option C"
+    />
+
+    <InputField
+      label="Option D"
+      value={question.option_d}
+      onChange={(e) =>
+        handleQuestionChange(questionIndex, "option_d", e.target.value)
+      }
+      placeholder="Enter Option D"
+    />
+
+    <p className="mb-1">Correct Answer:</p>
+    <select
+      value={question.correct_answer}
+      onChange={(e) =>
+        handleQuestionChange(questionIndex, "correct_answer", e.target.value)
+      }
+      className="w-full px-4 py-2.5 mb-3 rounded-md border border-gray-300 bg-[#EFEFEF]"
+      required
+    >
+      <option value="">Select Correct Answer</option>
+      <option value="a">Option A</option>
+      <option value="b">Option B</option>
+      <option value="c">Option C</option>
+      <option value="d">Option D</option>
+    </select>
+  </div>
+);
 
 const CreateQuizPage = () => {
   const [quizName, setQuizName] = useState("");
@@ -28,9 +132,24 @@ const CreateQuizPage = () => {
   };
 
   const handleQuestionChange = (questionIndex, field, value) => {
-    const updatedQuestions = [...questions];
-    updatedQuestions[questionIndex][field] = value;
+    const updatedQuestions = questions.map((question, idx) =>
+      idx === questionIndex ? { ...question, [field]: value } : question
+    );
     setQuestions(updatedQuestions);
+  };
+
+  const resetForm = () => {
+    setQuizName("");
+    setQuestions([
+      {
+        question: "",
+        option_a: "",
+        option_b: "",
+        option_c: "",
+        option_d: "",
+        correct_answer: "",
+      },
+    ]);
   };
 
   const addQuestion = () => {
@@ -53,34 +172,45 @@ const CreateQuizPage = () => {
     setError("");
 
     try {
-      const response = await fetch(`${apiUrl}/quizzes`, {
+      console.log("Sending request to:", `${apiUrl}/quizzes`);
+      console.log(
+        "Request payload:",
+        JSON.stringify({ quiz_name: quizName, questions })
+      );
+
+      const response = await fetch(`${apiUrl}/quizzes/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ quiz_name: quizName, questions }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || "Failed to create quiz");
+      console.log("Response status:", response.status);
+
+      // Handle non-JSON responses
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        const data = await response.json();
+        console.log("Response data:", data);
+
+        if (!response.ok) {
+          throw new Error(data.detail || "Failed to create quiz");
+        }
+
+        // Success!
+        setIsSuccess(true);
+        setTimeout(() => {
+          setIsSuccess(false);
+          resetForm();
+        }, 3000);
+      } else {
+        const text = await response.text();
+        console.log("Response (text):", text);
+        throw new Error(
+          "Server did not return JSON. Status: " + response.status
+        );
       }
-
-      // Success!
-      setIsSuccess(true);
-      setTimeout(() => setIsSuccess(false), 3000);
-
-      // Reset form
-      setQuizName("");
-      setQuestions([
-        {
-          question: "",
-          option_a: "",
-          option_b: "",
-          option_c: "",
-          option_d: "",
-          correct_answer: "",
-        },
-      ]);
     } catch (err) {
+      console.error("Error details:", err);
       setError(err.message || "Error creating quiz. Please try again.");
     } finally {
       setIsLoading(false);
@@ -104,137 +234,30 @@ const CreateQuizPage = () => {
         >
           <h1 className="font-bold text-2xl mb-4 text-center">Quiz Maker</h1>
 
-          {/* Success message */}
+          {/* Success and Error Messages */}
           {isSuccess && (
-            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
-              Quiz created successfully!
-            </div>
+            <Message type="success" message="Quiz created successfully!" />
           )}
-
-          {/* Error message */}
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
-              {error}
-            </div>
-          )}
+          {error && <Message type="error" message={error} />}
 
           <form onSubmit={createQuiz}>
             <div className="mb-4">
-              <p className="mb-1">Quiz Name:</p>
-              <input
-                placeholder="Enter Quiz Name"
+              <InputField
+                label="Quiz Name"
                 value={quizName}
                 onChange={handleQuizNameChange}
-                className="w-full px-4 py-2.5 mb-5 rounded-md border border-gray-300 bg-[#EFEFEF]"
-                required
+                placeholder="Enter Quiz Name"
               />
             </div>
 
             {/* Questions */}
             {questions.map((question, questionIndex) => (
-              <div
+              <QuestionForm
                 key={questionIndex}
-                className="mb-6 p-4 bg-white/50 rounded-lg border border-gray-200"
-              >
-                <h2 className="font-semibold mb-3">
-                  Question {questionIndex + 1}
-                </h2>
-
-                <p className="mb-1">Question Text:</p>
-                <input
-                  placeholder="Enter a Question"
-                  value={question.question}
-                  onChange={(e) =>
-                    handleQuestionChange(
-                      questionIndex,
-                      "question",
-                      e.target.value
-                    )
-                  }
-                  className="w-full px-4 py-2.5 mb-3 rounded-md border border-gray-300 bg-[#EFEFEF]"
-                  required
-                />
-
-                <p className="mb-1">Option A:</p>
-                <input
-                  placeholder="Enter Option A"
-                  value={question.option_a}
-                  onChange={(e) =>
-                    handleQuestionChange(
-                      questionIndex,
-                      "option_a",
-                      e.target.value
-                    )
-                  }
-                  className="w-full px-4 py-2.5 mb-3 rounded-md border border-gray-300 bg-[#EFEFEF]"
-                  required
-                />
-
-                <p className="mb-1">Option B:</p>
-                <input
-                  placeholder="Enter Option B"
-                  value={question.option_b}
-                  onChange={(e) =>
-                    handleQuestionChange(
-                      questionIndex,
-                      "option_b",
-                      e.target.value
-                    )
-                  }
-                  className="w-full px-4 py-2.5 mb-3 rounded-md border border-gray-300 bg-[#EFEFEF]"
-                  required
-                />
-
-                <p className="mb-1">Option C:</p>
-                <input
-                  placeholder="Enter Option C"
-                  value={question.option_c}
-                  onChange={(e) =>
-                    handleQuestionChange(
-                      questionIndex,
-                      "option_c",
-                      e.target.value
-                    )
-                  }
-                  className="w-full px-4 py-2.5 mb-3 rounded-md border border-gray-300 bg-[#EFEFEF]"
-                  required
-                />
-
-                <p className="mb-1">Option D:</p>
-                <input
-                  placeholder="Enter Option D"
-                  value={question.option_d}
-                  onChange={(e) =>
-                    handleQuestionChange(
-                      questionIndex,
-                      "option_d",
-                      e.target.value
-                    )
-                  }
-                  className="w-full px-4 py-2.5 mb-3 rounded-md border border-gray-300 bg-[#EFEFEF]"
-                  required
-                />
-
-                <p className="mb-1">Correct Answer:</p>
-                <select
-                  value={question.correct_answer}
-                  onChange={(e) =>
-                    handleQuestionChange(
-                      questionIndex,
-                      "correct_answer",
-                      e.target.value
-                    )
-                  }
-                  className="w-full px-4 py-2.5 mb-3 rounded-md border border-gray-300 bg-[#EFEFEF]"
-                  required
-                >
-                  <option value="">Select Correct Answer</option>
-                  <option value="a">Option A</option>
-                  <option value="b">Option B</option>
-                  <option value="c">Option C</option>
-                  <option value="d">Option D</option>
-                </select>
-              </div>
+                question={question}
+                questionIndex={questionIndex}
+                handleQuestionChange={handleQuestionChange}
+              />
             ))}
 
             {/* Add Question Button */}
