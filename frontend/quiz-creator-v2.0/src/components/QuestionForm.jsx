@@ -1,20 +1,9 @@
 import React from "react";
 import InputField from "./InputField";
 
-const QuestionForm = ({ question, questionIndex, handleQuestionChange, onRemove }) => (
+const QuestionForm = ({ question, questionIndex, handleQuestionChange }) => (
   <div className="mb-6 p-4 bg-white/50 rounded-lg border border-gray-200">
-    <div className="flex justify-between items-center mb-3">
-      <h2 className="font-semibold">Question {questionIndex + 1}</h2>
-      {onRemove && (
-        <button 
-          type="button" 
-          onClick={() => onRemove(questionIndex)}
-          className="text-red-600 hover:text-red-800"
-        >
-          Remove
-        </button>
-      )}
-    </div>
+    <h2 className="font-semibold mb-3">Question {questionIndex + 1}</h2>
 
     <InputField
       label="Question Text"
@@ -37,44 +26,46 @@ const QuestionForm = ({ question, questionIndex, handleQuestionChange, onRemove 
     <InputField
       label="Option B"
       value={question.option_b}
-      onChange={(e)// filepath: c:\Users\Gil\Desktop\quiz-creator-v2.0\quiz_creator\frontend\quiz-creator-v2.0\src\components\QuestionForm.jsx
-import React from "react";
-import InputField from "./InputField";
-
-const QuestionForm = ({ question, questionIndex, handleQuestionChange, onRemove }) => (
-  <div className="mb-6 p-4 bg-white/50 rounded-lg border border-gray-200">
-    <div className="flex justify-between items-center mb-3">
-      <h2 className="font-semibold">Question {questionIndex + 1}</h2>
-      {onRemove && (
-        <button 
-          type="button" 
-          onClick={() => onRemove(questionIndex)}
-          className="text-red-600 hover:text-red-800"
-        >
-          Remove
-        </button>
-      )}
-    </div>
-
-    <InputField
-      label="Question Text"
-      value={question.question}
       onChange={(e) =>
-        handleQuestionChange(questionIndex, "question", e.target.value)
+        handleQuestionChange(questionIndex, "option_b", e.target.value)
       }
-      placeholder="Enter a Question"
+      placeholder="Enter Option B"
     />
 
     <InputField
-      label="Option A"
-      value={question.option_a}
+      label="Option C"
+      value={question.option_c}
       onChange={(e) =>
-        handleQuestionChange(questionIndex, "option_a", e.target.value)
+        handleQuestionChange(questionIndex, "option_c", e.target.value)
       }
-      placeholder="Enter Option A"
+      placeholder="Enter Option C"
     />
 
     <InputField
-      label="Option B"
-      value={question.option_b}
-      onChange={(e)
+      label="Option D"
+      value={question.option_d}
+      onChange={(e) =>
+        handleQuestionChange(questionIndex, "option_d", e.target.value)
+      }
+      placeholder="Enter Option D"
+    />
+
+    <p className="mb-1">Correct Answer:</p>
+    <select
+      value={question.correct_answer}
+      onChange={(e) =>
+        handleQuestionChange(questionIndex, "correct_answer", e.target.value)
+      }
+      className="w-full px-4 py-2.5 mb-3 rounded-md border border-gray-300 bg-[#EFEFEF]"
+      required
+    >
+      <option value="">Select Correct Answer</option>
+      <option value="a">Option A</option>
+      <option value="b">Option B</option>
+      <option value="c">Option C</option>
+      <option value="d">Option D</option>
+    </select>
+  </div>
+);
+
+export default QuestionForm;
