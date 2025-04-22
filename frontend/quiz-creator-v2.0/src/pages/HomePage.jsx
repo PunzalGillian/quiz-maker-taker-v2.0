@@ -1,7 +1,11 @@
 import React from "react";
 
 const HomePage = () => {
-  return <div></div>;
+  return (
+    <div>
+      <div>Quiz Creator</div>
+    </div>
+  );
 };
 
 export default HomePage;
