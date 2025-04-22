@@ -1,114 +1,11 @@
 import React, { useState } from "react";
 import bg from "/src/assets/bg.png";
 import "../index.css";
+import QuestionForm from "../components/QuestionForm";
+import InputField from "../components/InputField";
+import Message from "../components/MessageComponent";
 
 const apiUrl = "https://quiz-maker-taker-v2-0.onrender.com";
-
-// Reusable Input Component
-const InputField = ({
-  label,
-  value,
-  onChange,
-  placeholder,
-  type = "text",
-  required = true,
-}) => {
-  return (
-    <>
-      <p className="mb-1">{label}:</p>
-      <input
-        type={type}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        className="w-full px-4 py-2.5 mb-3 rounded-md border border-gray-300 bg-[#EFEFEF]"
-        required={required}
-      />
-    </>
-  );
-};
-
-// Message Component for Success and Error Messages
-const Message = ({ type, message }) => {
-  const styles =
-    type === "success"
-      ? "bg-green-100 border-green-400 text-green-700"
-      : "bg-red-100 border-red-400 text-red-700";
-
-  return (
-    <div className={`${styles} border px-4 py-3 rounded relative mb-4`}>
-      {message}
-    </div>
-  );
-};
-
-// Question Form Component
-const QuestionForm = ({ question, questionIndex, handleQuestionChange }) => (
-  <div className="mb-6 p-4 bg-white/50 rounded-lg border border-gray-200">
-    <h2 className="font-semibold mb-3">Question {questionIndex + 1}</h2>
-
-    <InputField
-      label="Question Text"
-      value={question.question}
-      onChange={(e) =>
-        handleQuestionChange(questionIndex, "question", e.target.value)
-      }
-      placeholder="Enter a Question"
-    />
-
-    <InputField
-      label="Option A"
-      value={question.option_a}
-      onChange={(e) =>
-        handleQuestionChange(questionIndex, "option_a", e.target.value)
-      }
-      placeholder="Enter Option A"
-    />
-
-    <InputField
-      label="Option B"
-      value={question.option_b}
-      onChange={(e) =>
-        handleQuestionChange(questionIndex, "option_b", e.target.value)
-      }
-      placeholder="Enter Option B"
-    />
-
-    <InputField
-      label="Option C"
-      value={question.option_c}
-      onChange={(e) =>
-        handleQuestionChange(questionIndex, "option_c", e.target.value)
-      }
-      placeholder="Enter Option C"
-    />
-
-    <InputField
-      label="Option D"
-      value={question.option_d}
-      onChange={(e) =>
-        handleQuestionChange(questionIndex, "option_d", e.target.value)
-      }
-      placeholder="Enter Option D"
-    />
-
-    <p className="mb-1">Correct Answer:</p>
-    <select
-      value={question.correct_answer}
-      onChange={(e) =>
-        handleQuestionChange(questionIndex, "correct_answer", e.target.value)
-      }
-      className="w-full px-4 py-2.5 mb-3 rounded-md border border-gray-300 bg-[#EFEFEF]"
-      required
-    >
-      <option value="">Select Correct Answer</option>
-      <option value="a">Option A</option>
-      <option value="b">Option B</option>
-      <option value="c">Option C</option>
-      <option value="d">Option D</option>
-    </select>
-  </div>
-);
 
 const CreateQuizPage = () => {
   const [quizName, setQuizName] = useState("");
