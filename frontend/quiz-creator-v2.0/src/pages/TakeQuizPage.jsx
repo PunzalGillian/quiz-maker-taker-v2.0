@@ -1,11 +1,17 @@
 import React from "react";
 import "../index.css";
+import bgPlain from "/src/assets/bg-Plain.png";
 
 const TakeQuizPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
-      <div className="w-[100%] bg-[#C3D5D4] lg:h-[60vh] h-[50vh] flex items-center justify-center">
-        <p className="text-xl font-medium">Question</p>
+      <div
+        className="w-[100%] bg-[#C3D5D4] lg:h-[60vh] h-[50vh] flex items-center justify-center"
+        style={{ backgroundImage: `url(${bgPlain})` }}
+      >
+        <h1 className="lg:text-5xl text-3xl font-bold">
+          QUestiion question questions
+        </h1>
       </div>
 
       <div className="py-7 px-4 flex flex-col lg:py-15">
