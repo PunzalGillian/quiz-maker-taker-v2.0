@@ -39,7 +39,5 @@ multiple-choice questions, and result tracking — all in a clean, responsive in
 ![image](https://github.com/user-attachments/assets/78c2e74a-631f-49b6-8e9c-143f05bb0a5e)
 ![image](https://github.com/user-attachments/assets/63bfd273-e089-4c66-a532-04fb594873ab)
 
-## 🙌 Made With
-
-Crafted with ❤️ by Gil  
-Originally built for the a school assignment
+ 
+[Originally built for a school assignment]
