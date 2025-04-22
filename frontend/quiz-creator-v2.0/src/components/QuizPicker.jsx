@@ -14,7 +14,7 @@ const QuizPicker = ({ quizzes, onSelectQuiz }) => {
       {/* Content overlay */}
       <div className="relative z-10 min-h-screen flex flex-col">
         <div className="container mx-auto py-8 px-4">
-          <h1 className="text-3xl font-bold text-center mb-8 text-white">
+          <h1 className="text-3xl font-bold text-center mb-8 text-black">
             Select a Quiz
           </h1>
 

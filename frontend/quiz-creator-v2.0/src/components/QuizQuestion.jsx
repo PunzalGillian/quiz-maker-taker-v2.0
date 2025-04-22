@@ -13,16 +13,20 @@ const QuizQuestion = ({
   return (
     <div className="min-h-screen flex flex-col">
       <div
-        className="w-full bg-[#C3D5D4] lg:h-[60vh] h-[50vh] flex items-center justify-center"
+        className="w-full bg-[#C3D5D4] lg:h-[60vh] h-[50vh] flex items-center justify-center relative"
         style={{ backgroundImage: `url(${bgImage})` }}
       >
+        {/* Question counter moved to upper left */}
+        <div className="absolute top-4 left-4">
+          <p className="text-lg font-medium">
+            Question {currentQuestionIndex + 1} of {totalQuestions}
+          </p>
+        </div>
+
         <div className="container mx-auto px-4 text-center">
           <h1 className="lg:text-4xl text-2xl font-bold">
             {currentQuestion.question}
           </h1>
-          <p className="mt-4 text-lg font-medium">
-            Question {currentQuestionIndex + 1} of {totalQuestions}
-          </p>
         </div>
       </div>
 
@@ -31,7 +35,7 @@ const QuizQuestion = ({
           <button
             className={`rounded-xl px-6 py-5 w-full text-[#213547] font-medium cursor-pointer transition-colors duration-200 ${
               selectedAnswers[currentQuestionIndex] === "a"
-                ? "bg-[#213547] text-white"
+                ? "bg-[#1B191D] text-white"
                 : "bg-[#EFEFEF]"
             }`}
             onClick={() => handleSelectAnswer(currentQuestionIndex, "a")}
@@ -42,7 +46,7 @@ const QuizQuestion = ({
           <button
             className={`rounded-xl px-6 py-5 w-full text-[#213547] font-medium cursor-pointer transition-colors duration-200 ${
               selectedAnswers[currentQuestionIndex] === "b"
-                ? "bg-[#213547] text-white"
+                ? "bg-[#1B191D] text-white"
                 : "bg-[#EFEFEF]"
             }`}
             onClick={() => handleSelectAnswer(currentQuestionIndex, "b")}
@@ -53,7 +57,7 @@ const QuizQuestion = ({
           <button
             className={`rounded-xl px-6 py-5 w-full text-[#213547] font-medium cursor-pointer transition-colors duration-200 ${
               selectedAnswers[currentQuestionIndex] === "c"
-                ? "bg-[#213547] text-white"
+                ? "bg-[#1B191D] text-white"
                 : "bg-[#EFEFEF]"
             }`}
             onClick={() => handleSelectAnswer(currentQuestionIndex, "c")}
@@ -64,7 +68,7 @@ const QuizQuestion = ({
           <button
             className={`rounded-xl px-6 py-5 w-full text-[#213547] font-medium cursor-pointer transition-colors duration-200 ${
               selectedAnswers[currentQuestionIndex] === "d"
-                ? "bg-[#213547] text-white"
+                ? "bg-[#1B191D] text-white"
                 : "bg-[#EFEFEF]"
             }`}
             onClick={() => handleSelectAnswer(currentQuestionIndex, "d")}
