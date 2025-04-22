@@ -16,7 +16,7 @@ const TakeQuizPage = () => {
 
       <div className="py-7 px-4 flex flex-col lg:py-15">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-[85vw] max-w-[85vw] mx-auto">
-          <button className="bg-[#EFEFEF] rounded-xl px-6 py-5 w-full text-[#213547] font-medium cursor-pointer transition-colors duration-200">
+          <button className="bg-[#EFEFEF] border-blackrounded-xl px-6 py-5 w-full text-[#213547] font-medium cursor-pointer transition-colors duration-200">
             Option A
           </button>
           <button className="bg-[#EFEFEF] rounded-xl px-6 py-5 w-full text-[#213547] font-medium cursor-pointer transition-colors duration-200">
