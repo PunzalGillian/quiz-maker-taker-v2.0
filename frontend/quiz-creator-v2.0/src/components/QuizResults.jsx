@@ -1,4 +1,5 @@
 import React from "react";
+import bg from "/src/assets/bg.png";
 
 // Helper function moved outside the component
 const normalizeAnswer = (answer) => {
@@ -13,7 +14,7 @@ const ScoreSummary = ({ score, totalQuestions }) => {
     totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
 
   return (
-    <div className="bg-gray-100 p-6 rounded-lg mb-6">
+    <div className="bg-[#EFEFEF] p-6 rounded-lg mb-6">
       <div className="flex justify-between mb-2">
         <span>Score:</span>
         <span className="font-bold">
@@ -25,7 +26,7 @@ const ScoreSummary = ({ score, totalQuestions }) => {
         <span className="font-bold">{percentage}%</span>
       </div>
 
-      <div className="h-4 w-full bg-gray-200 rounded-full">
+      <div className="h-4 w-full bg-gray-300 rounded-full">
         <div
           className={`h-full rounded-full ${
             percentage >= 70
@@ -144,8 +145,14 @@ const QuizResults = ({ quiz, score, selectedAnswers, onReset }) => {
   const totalQuestions = quiz.questions.length;
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#c3d5d4]">
-      <div className="container mx-auto max-w-2xl py-8 px-4">
+    <div className="min-h-screen flex flex-col relative">
+      {/* Position the background image */}
+      <img
+        src={bg}
+        alt=""
+        className="absolute inset-0 h-full w-full object-cover blur-md brightness-75 z-0"
+      />
+      <div className="container mx-auto max-w-2xl py-8 px-4 relative z-10">
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h1 className="text-3xl font-bold text-center mb-6">Quiz Results</h1>
           <h2 className="text-xl font-semibold mb-4 text-center">

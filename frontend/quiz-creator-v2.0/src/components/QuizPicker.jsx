@@ -27,7 +27,7 @@ const QuizPicker = ({ quizzes, onSelectQuiz }) => {
             {quizzes.map((quiz) => (
               <div
                 key={quiz.id || quiz._id || Math.random().toString()}
-                className="bg-white/75 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+                className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
               >
                 <h2 className="text-xl font-bold mb-2">{quiz.quiz_name}</h2>
                 <p className="text-gray-600 mb-4">
