@@ -1,6 +1,6 @@
 import React from "react";
 
-const QuizPicker = ({ quizzes, onSelectQuiz, isLoading }) => {
+const QuizPicker = ({ quizzes, onSelectQuiz }) => {
   return (
     <div className="min-h-screen flex flex-col bg-[#c3d5d4]">
       <div className="container mx-auto py-8 px-4">
@@ -13,21 +13,33 @@ const QuizPicker = ({ quizzes, onSelectQuiz, isLoading }) => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {quizzes.map((quiz, index) => (
-              <div
-                key={index}
-                className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
-                onClick={() => onSelectQuiz(quiz.quiz_name)}
-              >
-                <h2 className="text-xl font-bold mb-2">{quiz.quiz_name}</h2>
-                <p className="text-gray-600 mb-4">
-                  {quiz.questions?.length || 0} questions
-                </p>
-                <button className="w-full py-2 bg-[#1B191D] text-white rounded-md hover:bg-opacity-90 transition-colors">
-                  Take Quiz
-                </button>
-              </div>
-            ))}
+            {quizzes.map((quiz, index) => {
+              // Log the quiz object to see its structure
+              console.log("Quiz object:", quiz);
+
+              // Check if questions count exists in different ways
+              const questionCount =
+                quiz.questions?.length ||
+                quiz.question_count ||
+                quiz.questionCount ||
+                "?";
+
+              return (
+                <div
+                  key={index}
+                  className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+                  onClick={() => onSelectQuiz(quiz.quiz_name)}
+                >
+                  <h2 className="text-xl font-bold mb-2">{quiz.quiz_name}</h2>
+                  <p className="text-gray-600 mb-4">
+                    {questionCount} questions
+                  </p>
+                  <button className="w-full py-2 bg-[#1B191D] text-white rounded-md hover:bg-opacity-90 transition-colors">
+                    Take Quiz
+                  </button>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

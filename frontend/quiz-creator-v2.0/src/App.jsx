@@ -5,6 +5,8 @@ import CreateQuizPage from "./pages/CreateQuizPage";
 import TakeQuizPage from "./pages/TakeQuizPage";
 import HomePage from "./pages/HomePage";
 
+import QuizPicker from "./components/QuizPicker.jsx";
+
 function App() {
   return (
     <Router>
