@@ -2,7 +2,15 @@ import React from "react";
 import bg from "/src/assets/bg.png";
 import "../index.css";
 
+const apiURL =
+  window.ENV?.VITE_API_URL ||
+  import.meta.env.VITE_API_URL ||
+  "https://fast-api-quiz-creator.onrender.com";
+
 const CreateQuizPage = () => {
+  const [quizName, setQuizName] = useState("");
+  const [questions, setQuestions] = useState("");
+
   return (
     <div className="relative min-h-screen">
       {/* Background image with blur effect */}
@@ -57,6 +65,8 @@ const CreateQuizPage = () => {
           </button>
         </div>
       </div>
+
+      <script>function</script>
     </div>
   );
 };
