@@ -1,5 +1,6 @@
 import React from "react";
 import bg from "/src/assets/bg.png";
+import titleIcon from "/src/assets/title.png";
 import quizCreatorIcon from "/src/assets/quiz-creator.png";
 import quizTakerIcon from "/src/assets/quiz-taker.png";
 
@@ -10,7 +11,14 @@ const HomePage = () => {
         className="min-h-screen bg-cover bg-center flex flex-col items-center justify-center text-white"
         style={{ backgroundImage: `url(${bg})` }}
       >
-        <a href="/create" className="mt-60 py-5">
+        <div>
+          <img
+            src={titleIcon}
+            alt="quiz title"
+            className="w-[85vw] md:h-auto md:w-auto"
+          />
+        </div>
+        <a href="/create" className="py-5">
           <img
             src={quizCreatorIcon}
             alt="Create a Quiz"
