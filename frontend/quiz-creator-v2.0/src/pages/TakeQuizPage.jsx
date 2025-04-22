@@ -3,6 +3,10 @@ import "../index.css";
 import bgPlain from "/src/assets/bg-Plain.png";
 import QuizPicker from "../components/QuizPicker";
 import QuizResults from "../components/QuizResults";
+import QuizQuestion from "../components/QuizQuestion";
+import LoadingScreen from "../components/LoadingScreen";
+import ErrorScreen from "../components/ErrorScreen";
+import NoQuestionsScreen from "../components/NoQuestionsScreen";
 
 const apiUrl = "https://quiz-maker-taker-v2-0.onrender.com";
 
@@ -120,30 +124,13 @@ const TakeQuizPage = () => {
 
   // Loading screen
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-[#c3d5d4]">
-        <div className="w-full max-w-sm p-6 bg-white rounded-md shadow-md text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1B191D] mx-auto mb-4"></div>
-          <p className="text-xl font-bold">Loading...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   // Error screen
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#c3d5d4]">
-        <div className="w-full max-w-sm p-6 bg-white rounded-md shadow-md text-center">
-          <p className="text-red-600 mb-4">{error}</p>
-          <button
-            className="px-4 py-2 bg-[#1B191D] text-white rounded-md"
-            onClick={() => window.location.reload()}
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
+      <ErrorScreen message={error} onRetry={() => window.location.reload()} />
     );
   }
 
@@ -168,109 +155,20 @@ const TakeQuizPage = () => {
   const currentQuestion = currentQuiz?.questions?.[currentQuestionIndex];
 
   if (!currentQuestion) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-[#c3d5d4]">
-        <div className="w-full max-w-sm p-6 bg-white rounded-md shadow-md text-center">
-          <p className="text-red-600 mb-4">No questions found for this quiz.</p>
-          <button
-            className="px-4 py-2 bg-[#1B191D] text-white rounded-md"
-            onClick={resetQuiz}
-          >
-            Back to Quiz Selection
-          </button>
-        </div>
-      </div>
-    );
+    return <NoQuestionsScreen onReset={resetQuiz} />;
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <div
-        className="w-full bg-[#C3D5D4] lg:h-[60vh] h-[50vh] flex items-center justify-center"
-        style={{ backgroundImage: `url(${bgPlain})` }}
-      >
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="lg:text-4xl text-2xl font-bold">
-            {currentQuestion.question}
-          </h1>
-          <p className="mt-4 text-lg font-medium">
-            Question {currentQuestionIndex + 1} of{" "}
-            {currentQuiz.questions.length}
-          </p>
-        </div>
-      </div>
-
-      <div className="py-7 px-4 flex flex-col lg:py-15">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-[85vw] max-w-[85vw] mx-auto">
-          <button
-            className={`rounded-xl px-6 py-5 w-full text-[#213547] font-medium cursor-pointer transition-colors duration-200 ${
-              selectedAnswers[currentQuestionIndex] === "a"
-                ? "bg-[#213547] text-white"
-                : "bg-[#EFEFEF]"
-            }`}
-            onClick={() => handleSelectAnswer(currentQuestionIndex, "a")}
-          >
-            A: {currentQuestion.option_a}
-          </button>
-
-          <button
-            className={`rounded-xl px-6 py-5 w-full text-[#213547] font-medium cursor-pointer transition-colors duration-200 ${
-              selectedAnswers[currentQuestionIndex] === "b"
-                ? "bg-[#213547] text-white"
-                : "bg-[#EFEFEF]"
-            }`}
-            onClick={() => handleSelectAnswer(currentQuestionIndex, "b")}
-          >
-            B: {currentQuestion.option_b}
-          </button>
-
-          <button
-            className={`rounded-xl px-6 py-5 w-full text-[#213547] font-medium cursor-pointer transition-colors duration-200 ${
-              selectedAnswers[currentQuestionIndex] === "c"
-                ? "bg-[#213547] text-white"
-                : "bg-[#EFEFEF]"
-            }`}
-            onClick={() => handleSelectAnswer(currentQuestionIndex, "c")}
-          >
-            C: {currentQuestion.option_c}
-          </button>
-
-          <button
-            className={`rounded-xl px-6 py-5 w-full text-[#213547] font-medium cursor-pointer transition-colors duration-200 ${
-              selectedAnswers[currentQuestionIndex] === "d"
-                ? "bg-[#213547] text-white"
-                : "bg-[#EFEFEF]"
-            }`}
-            onClick={() => handleSelectAnswer(currentQuestionIndex, "d")}
-          >
-            D: {currentQuestion.option_d}
-          </button>
-        </div>
-
-        <div className="flex justify-between mt-8 w-[85vw] max-w-[85vw] mx-auto">
-          <button
-            className={`px-6 py-2 rounded-lg ${
-              currentQuestionIndex === 0
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-gray-800 text-white"
-            }`}
-            onClick={handlePrevQuestion}
-            disabled={currentQuestionIndex === 0}
-          >
-            Previous
-          </button>
-
-          <button
-            className="px-6 py-2 bg-[#1B191D] text-white rounded-lg"
-            onClick={handleNextQuestion}
-          >
-            {currentQuestionIndex === currentQuiz.questions.length - 1
-              ? "Finish"
-              : "Next"}
-          </button>
-        </div>
-      </div>
-    </div>
+    <QuizQuestion
+      currentQuestion={currentQuestion}
+      currentQuestionIndex={currentQuestionIndex}
+      totalQuestions={currentQuiz.questions.length}
+      selectedAnswers={selectedAnswers}
+      handleSelectAnswer={handleSelectAnswer}
+      handlePrevQuestion={handlePrevQuestion}
+      handleNextQuestion={handleNextQuestion}
+      bgImage={bgPlain}
+    />
   );
 };
 
