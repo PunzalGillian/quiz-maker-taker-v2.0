@@ -3,7 +3,6 @@ import bg from "/src/assets/bg.png";
 import "../index.css";
 
 const apiUrl = "https://quiz-maker-taker-v2-0.onrender.com";
-console.log("Sending request to:", `${apiUrl}/quizzes/`);
 
 // Reusable Input Component
 const InputField = ({
@@ -172,45 +171,29 @@ const CreateQuizPage = () => {
     setError("");
 
     try {
-      console.log("Sending request to:", `${apiUrl}/quizzes`);
-      console.log(
-        "Request payload:",
-        JSON.stringify({ quiz_name: quizName, questions })
-      );
-
       const response = await fetch(`${apiUrl}/quizzes/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ quiz_name: quizName, questions }),
       });
 
-      console.log("Response status:", response.status);
-
-      // Handle non-JSON responses
       const contentType = response.headers.get("content-type");
-      if (contentType && contentType.includes("application/json")) {
-        const data = await response.json();
-        console.log("Response data:", data);
+      const data = contentType?.includes("application/json")
+        ? await response.json()
+        : { detail: "Server did not return JSON" };
 
-        if (!response.ok) {
-          throw new Error(data.detail || "Failed to create quiz");
-        }
-
-        // Success!
-        setIsSuccess(true);
-        setTimeout(() => {
-          setIsSuccess(false);
-          resetForm();
-        }, 3000);
-      } else {
-        const text = await response.text();
-        console.log("Response (text):", text);
-        throw new Error(
-          "Server did not return JSON. Status: " + response.status
-        );
+      if (!response.ok) {
+        throw new Error(data.detail || "Failed to create quiz");
       }
+
+      // Success handling
+      setIsSuccess(true);
+      setTimeout(() => {
+        setIsSuccess(false);
+        resetForm();
+      }, 3000);
     } catch (err) {
-      console.error("Error details:", err);
+      console.error("Error:", err);
       setError(err.message || "Error creating quiz. Please try again.");
     } finally {
       setIsLoading(false);
