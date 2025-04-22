@@ -1,7 +1,7 @@
 import React from "react";
 import "../index.css";
 
-const CreateQuizPage = () => {
+const TakeQuizPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <div className="w-[100%] bg-[#C3D5D4] lg:h-[60vh] h-[50vh] flex items-center justify-center">
@@ -28,4 +28,4 @@ const CreateQuizPage = () => {
   );
 };
 
-export default CreateQuizPage;
+export default TakeQuizPage;
