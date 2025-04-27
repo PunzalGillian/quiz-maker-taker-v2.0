@@ -9,11 +9,12 @@ from ..database import (
     get_quiz,
     save_quiz_to_db,
     delete_quiz_from_db,
-    get_quiz_by_id as get_quiz_by_id_db,  # Rename to avoid conflict
-    database  # Import database directly
+    get_quiz_by_id as get_quiz_by_id_db,
+    database
 )
 from bson import ObjectId
 from ..utils import mongodb_response
+from ..shuffling import shuffle_quiz
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -102,8 +103,7 @@ async def get_quiz_by_name(
 async def get_quiz_by_id(
     quiz_id: str,
     request: Request,
-    shuffle: bool = Query(
-        True, description="Whether to shuffle questions and options")
+    shuffle: bool = Query(True)
 ):
     """Get a quiz by its ID with option to shuffle questions and answers."""
     try:
@@ -138,7 +138,8 @@ async def get_quiz_by_id(
                 logger.error(f"Error shuffling quiz: {e}", exc_info=True)
                 # Continue without shuffling if it fails
 
-        return serializable_quiz
+        # At the end, return the response using the helper
+        return mongodb_response(quiz)
     except HTTPException:
         # Re-raise HTTP exceptions
         raise

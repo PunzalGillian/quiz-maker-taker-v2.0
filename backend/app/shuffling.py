@@ -1,10 +1,17 @@
 import random
 from copy import deepcopy
 from typing import Dict, Any
+from bson import ObjectId
 
 
 def shuffle_quiz(quiz_data: Dict[str, Any], shuffle_questions: bool = True, shuffle_options: bool = True) -> Dict[str, Any]:
+    # Make a deep copy to avoid modifying the original
     result = deepcopy(quiz_data)
+
+    # If _id is still in the dict (not removed earlier), convert to string
+    if "_id" in result and isinstance(result["_id"], ObjectId):
+        result["id"] = str(result["_id"])
+        del result["_id"]
 
     if 'questions' not in result or not result['questions']:
         return result
