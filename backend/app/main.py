@@ -73,10 +73,6 @@ app.add_middleware(
 # Include routers
 app.include_router(quiz_router)
 
-# Use environment variables
-app.mongodb_client = AsyncIOMotorClient(MONGODB_URL)
-app.mongodb = app.mongodb_client[DB_NAME]
-
 
 @app.get("/")
 async def root():
