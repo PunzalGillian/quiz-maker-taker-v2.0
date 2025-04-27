@@ -11,7 +11,7 @@ import NoQuestionsScreen from "../components/NoQuestionsScreen";
 const apiUrl =
   import.meta.env.VITE_API_BASE_URL ||
   "https://quiz-maker-taker-v2-0.onrender.com";
-console.log("Using API URL:", apiUrl); // For debugging
+//console.log("Using API URL:", apiUrl); // For debugging
 
 const TakeQuizPage = () => {
   const [quizzes, setQuizzes] = useState([]);
@@ -30,7 +30,7 @@ const TakeQuizPage = () => {
       setError("");
 
       try {
-        console.log("Fetching quizzes from:", apiUrl);
+        //console.log("Fetching quizzes from:", apiUrl);
 
         const response = await fetch(`${apiUrl}/quizzes`);
         console.log("Response status:", response.status);
@@ -40,7 +40,7 @@ const TakeQuizPage = () => {
         }
 
         let data = await response.json();
-        console.log("Raw quiz data:", data);
+        // console.log("Raw quiz data:", data);
 
         // Make sure each quiz has an ID
         const processedQuizzes = data.map((quiz) => {
@@ -89,7 +89,7 @@ const TakeQuizPage = () => {
       }
 
       let data = await response.json();
-      console.log("Received quiz data with shuffled questions:", data);
+      //console.log("Received quiz data with shuffled questions:", data);
 
       setCurrentQuiz(data);
       setCurrentQuestionIndex(0);

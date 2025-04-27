@@ -38,7 +38,7 @@ const QuizPicker = ({ quizzes, onSelectQuiz }) => {
                   className="w-full py-2 bg-[#1B191D] text-white rounded-md hover:bg-opacity-90 transition-colors"
                   onClick={(e) => {
                     e.stopPropagation();
-                    console.log("Selected quiz:", quiz); // Add this for debugging
+                    //console.log("Selected quiz:", quiz); // Add this for debugging
                     onSelectQuiz(quiz.id || quiz._id || quiz.quiz_name);
                   }}
                 >
