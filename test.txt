@@ -1,0 +1,7 @@
+123
+a) 23123
+b) 231
+c) 12
+d) 1
+Correct answer: a
+

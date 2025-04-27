@@ -4,7 +4,7 @@ import time
 import sys
 
 # API Configuration
-API_URL = "http://127.0.0.1:8000"
+API_URL = "https://quiz-maker-taker-v2-0.onrender.com/"
 TEST_QUIZ_NAME = "Test Quiz API"
 
 # Test data
