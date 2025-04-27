@@ -12,8 +12,8 @@ from ..database import (
     get_quiz_by_id as get_quiz_by_id_db,  # Rename to avoid conflict
     database  # Import database directly
 )
-from ..shuffling import shuffle_quiz
 from bson import ObjectId
+from ..utils import mongodb_response
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -107,23 +107,45 @@ async def get_quiz_by_id(
 ):
     """Get a quiz by its ID with option to shuffle questions and answers."""
     try:
-        obj_id = ObjectId(quiz_id)
+        # More robust ObjectId validation
+        try:
+            if not ObjectId.is_valid(quiz_id):
+                raise HTTPException(
+                    status_code=400, detail=f"Invalid ObjectId format: {quiz_id}")
+            obj_id = ObjectId(quiz_id)
+        except Exception as e:
+            logger.error(f"Invalid ObjectId: {quiz_id}, Error: {e}")
+            raise HTTPException(
+                status_code=400, detail=f"Invalid quiz ID format: {quiz_id}")
+
+        # Find quiz
         quiz = await request.app.mongodb.quizzes.find_one({"_id": obj_id})
 
         if not quiz:
+            logger.warning(f"Quiz with ID {quiz_id} not found")
             raise HTTPException(
                 status_code=404, detail=f"Quiz with ID {quiz_id} not found")
 
-        # Convert the MongoDB ObjectId to a string for JSON serialization
-        quiz["id"] = str(quiz["_id"])
+        # Convert MongoDB document to a plain dictionary with string IDs
+        serializable_quiz = dict(quiz)
+        serializable_quiz["id"] = str(serializable_quiz.pop("_id"))
 
-        # Apply shuffling if requested
+        # Shuffle quiz questions and options if requested
         if shuffle:
-            quiz = shuffle_quiz(quiz)
+            try:
+                serializable_quiz = shuffle_quiz(serializable_quiz)
+            except Exception as e:
+                logger.error(f"Error shuffling quiz: {e}", exc_info=True)
+                # Continue without shuffling if it fails
 
-        return quiz
+        return serializable_quiz
+    except HTTPException:
+        # Re-raise HTTP exceptions
+        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Error retrieving quiz by ID: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500, detail=f"Failed to retrieve quiz: {str(e)}")
 
 
 @router.get("/debug/{quiz_id}")
