@@ -74,38 +74,19 @@ const TakeQuizPage = () => {
 
     try {
       console.log(`Fetching quiz with ID: ${quizId}`);
-      console.log(`Full URL: ${apiUrl}/quizzes/id/${quizId}`);
 
-      // Fetch the quiz with the selected ID
+      // The backend will shuffle by default (shuffle=true)
       const response = await fetch(`${apiUrl}/quizzes/id/${quizId}`);
-      console.log(`Response status: ${response.status}`);
+
+      //disable shuffling
+      // const response = await fetch(`${apiUrl}/quizzes/id/${quizId}?shuffle=false`);
 
       if (!response.ok) {
         throw new Error(`Failed to fetch quiz: ${response.status}`);
       }
 
       let data = await response.json();
-      console.log("Full quiz data:", data);
-
-      if (!data.questions) {
-        data.questions = [];
-      }
-
-      // Make sure each question has its correct properties
-      if (data.questions && data.questions.length > 0) {
-        data.questions = data.questions.map((question) => {
-          return {
-            ...question,
-            // Ensure correct_answer exists
-            correct_answer:
-              question.correct_answer ||
-              question.correctAnswer ||
-              question.answer,
-          };
-        });
-      }
-
-      console.log("Processed quiz data:", data);
+      console.log("Received quiz data with shuffled questions:", data);
 
       setCurrentQuiz(data);
       setCurrentQuestionIndex(0);
