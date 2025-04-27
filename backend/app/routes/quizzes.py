@@ -107,28 +107,23 @@ async def get_quiz_by_id(
 ):
     """Get a quiz by its ID with option to shuffle questions and answers."""
     try:
-        # Convert string ID to ObjectId
         obj_id = ObjectId(quiz_id)
-
-        # Find the quiz in the database
         quiz = await request.app.mongodb.quizzes.find_one({"_id": obj_id})
 
         if not quiz:
             raise HTTPException(
                 status_code=404, detail=f"Quiz with ID {quiz_id} not found")
 
-        # Convert ObjectId to string for JSON response
+        # Convert the MongoDB ObjectId to a string for JSON serialization
         quiz["id"] = str(quiz["_id"])
 
-        # Shuffle quiz questions and options if requested
+        # Apply shuffling if requested
         if shuffle:
             quiz = shuffle_quiz(quiz)
 
         return quiz
     except Exception as e:
-        logger.error(f"Error retrieving quiz by ID: {e}")
-        raise HTTPException(
-            status_code=500, detail=f"Failed to retrieve quiz: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/debug/{quiz_id}")
