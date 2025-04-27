@@ -103,7 +103,8 @@ async def get_quiz_by_name(
 async def get_quiz_by_id(
     quiz_id: str,
     request: Request,
-    shuffle: bool = Query(True)
+    shuffle: bool = Query(
+        True, description="Whether to shuffle questions and options")
 ):
     """Get a quiz by its ID with option to shuffle questions and answers."""
     try:
@@ -126,25 +127,29 @@ async def get_quiz_by_id(
             raise HTTPException(
                 status_code=404, detail=f"Quiz with ID {quiz_id} not found")
 
-        # Convert MongoDB document to a plain dictionary with string IDs
-        serializable_quiz = dict(quiz)
-        serializable_quiz["id"] = str(serializable_quiz.pop("_id"))
+        # Add explicit logging for shuffle parameter
+        logger.info(f"Quiz {quiz_id}: shuffle={shuffle}")
 
-        # Shuffle quiz questions and options if requested
+        # Use mongodb_response only after shuffling!
+        quiz_data = dict(quiz)  # Convert from MongoDB document
+        quiz_data["id"] = str(quiz_data.pop("_id"))  # Handle ObjectId
+
+        # Apply shuffling
         if shuffle:
             try:
-                serializable_quiz = shuffle_quiz(serializable_quiz)
+                quiz_data = shuffle_quiz(quiz_data)
+                logger.info(f"Quiz shuffled successfully")
             except Exception as e:
-                logger.error(f"Error shuffling quiz: {e}", exc_info=True)
-                # Continue without shuffling if it fails
+                logger.error(f"Failed to shuffle quiz: {e}", exc_info=True)
+                # Continue with unshuffled quiz
 
-        # At the end, return the response using the helper
-        return mongodb_response(quiz)
+        # Return response
+        return mongodb_response(quiz_data)
     except HTTPException:
         # Re-raise HTTP exceptions
         raise
     except Exception as e:
-        logger.error(f"Error retrieving quiz by ID: {e}", exc_info=True)
+        logger.error(f"Error in get_quiz_by_id: {e}", exc_info=True)
         raise HTTPException(
             status_code=500, detail=f"Failed to retrieve quiz: {str(e)}")
 
