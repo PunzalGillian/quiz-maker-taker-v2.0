@@ -59,7 +59,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",  
-        "https://your-deployed-frontend.com",  # Add any other URLs
+        "https://quiz-creator-v2.netlify.app/",  # Add any other URLs
         "*"  # Or use this during development to allow all origins
     ],
     allow_credentials=True,
