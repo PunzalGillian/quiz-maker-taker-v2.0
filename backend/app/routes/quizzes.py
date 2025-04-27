@@ -1,16 +1,18 @@
 import os
 import logging
-from fastapi import APIRouter, HTTPException, Request
-from typing import List
+from fastapi import APIRouter, HTTPException, Request, Depends, Query, Body
+from typing import List, Optional, Dict, Any
+from pydantic import BaseModel, Field
 from ..models import QuizCreate, QuizInfo, QuizSubmission, QuizResult, Quiz
 from ..database import (
     get_all_quizzes, 
     get_quiz, 
     save_quiz_to_db,
     delete_quiz_from_db,
-    get_quiz_by_id,  # Add this import
+    get_quiz_by_id as get_quiz_by_id_db,  # Rename to avoid conflict
     database  # Import database directly
 )
+from ..shuffling import shuffle_quiz
 from bson import ObjectId
 
 # Configure logging
@@ -62,50 +64,60 @@ async def create_quiz(quiz: QuizCreate):
         "id": str(inserted_id)
     }
 
-# Option 1: Use different path parameters
 @router.get("/name/{quiz_name}")
-async def get_quiz_by_name(quiz_name: str):
-    """Get a specific quiz (without correct answers)"""
-    quiz = await get_quiz(quiz_name)
-    
-    if not quiz:
-        raise HTTPException(status_code=404, detail=f"Quiz '{quiz_name}' not found")
-    
-    # Create a copy of the questions without correct answers
-    questions_for_client = []
-    for q in quiz["questions"]:
-        # Create a copy of the question without correct_answer
-        q_copy = {k: v for k, v in q.items() if k != "correct_answer"}
-        questions_for_client.append(q_copy)
-    
-    return {
-        "quiz_name": quiz["quiz_name"],
-        "questions": questions_for_client,
-        "total_questions": len(questions_for_client)
-    }
-
-@router.get("/id/{quiz_id}", response_model=Quiz)
-async def get_quiz_by_id_route(quiz_id: str, request: Request):
-    """Get quiz by ID"""
+async def get_quiz_by_name(
+    quiz_name: str,
+    request: Request,
+    shuffle: bool = Query(True, description="Whether to shuffle questions and options")
+):
+    """Get a quiz by its name with option to shuffle questions and answers."""
     try:
-        logger.info(f"API: Requesting quiz with ID: {quiz_id}")
-        
-        # Try to get quiz from database
-        quiz = await get_quiz_by_id(quiz_id)
+        # Find the quiz in the database
+        quiz = await request.app.mongodb.quizzes.find_one({"quiz_name": quiz_name})
         
         if not quiz:
-            logger.warning(f"Quiz with ID {quiz_id} not found")
+            raise HTTPException(status_code=404, detail=f"Quiz '{quiz_name}' not found")
+        
+        # Convert ObjectId to string for JSON response
+        quiz["id"] = str(quiz["_id"])
+        
+        # Shuffle quiz questions and options if requested
+        if shuffle:
+            quiz = shuffle_quiz(quiz)
+        
+        return quiz
+    except Exception as e:
+        logger.error(f"Error retrieving quiz by name: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve quiz: {str(e)}")
+
+@router.get("/id/{quiz_id}")
+async def get_quiz_by_id(
+    quiz_id: str,
+    request: Request,
+    shuffle: bool = Query(True, description="Whether to shuffle questions and options")
+):
+    """Get a quiz by its ID with option to shuffle questions and answers."""
+    try:
+        # Convert string ID to ObjectId
+        obj_id = ObjectId(quiz_id)
+        
+        # Find the quiz in the database
+        quiz = await request.app.mongodb.quizzes.find_one({"_id": obj_id})
+        
+        if not quiz:
             raise HTTPException(status_code=404, detail=f"Quiz with ID {quiz_id} not found")
         
-        logger.info(f"Successfully retrieved quiz: {quiz['quiz_name']}")
+        # Convert ObjectId to string for JSON response
+        quiz["id"] = str(quiz["_id"])
+        
+        # Shuffle quiz questions and options if requested
+        if shuffle:
+            quiz = shuffle_quiz(quiz)
+        
         return quiz
-    except HTTPException:
-        raise
     except Exception as e:
-        logger.error(f"Server error getting quiz by ID: {str(e)}")
-        import traceback
-        logger.error(traceback.format_exc())
-        raise HTTPException(status_code=500, detail=f"Server error: {str(e)}")
+        logger.error(f"Error retrieving quiz by ID: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve quiz: {str(e)}")
 
 @router.get("/debug/{quiz_id}")
 async def debug_quiz_id(quiz_id: str, request: Request):
