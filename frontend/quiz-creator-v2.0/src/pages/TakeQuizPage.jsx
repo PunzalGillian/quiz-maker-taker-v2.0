@@ -8,7 +8,10 @@ import LoadingScreen from "../components/LoadingScreen";
 import ErrorScreen from "../components/ErrorScreen";
 import NoQuestionsScreen from "../components/NoQuestionsScreen";
 
-const apiUrl = import.meta.env.VITE_API_BASE_URL;
+const apiUrl =
+  import.meta.env.VITE_API_BASE_URL ||
+  "https://quiz-maker-taker-v2-0.onrender.com";
+console.log("Using API URL:", apiUrl); // For debugging
 
 const TakeQuizPage = () => {
   const [quizzes, setQuizzes] = useState([]);
