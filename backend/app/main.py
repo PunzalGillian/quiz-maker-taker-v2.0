@@ -1,11 +1,11 @@
 import os
 import logging
-from motor.motor_asyncio import AsyncIOMotorClient
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from .routes.quizzes import router as quiz_router
+from .database import Database
 
 
 class QuizAPI:
@@ -20,6 +20,9 @@ class QuizAPI:
         # MongoDB connection settings
         self.MONGODB_URL = os.getenv("MONGODB_URL")
         self.DB_NAME = os.getenv("DB_NAME", "quizzes_db")
+
+        # Initialize database
+        self.db = Database()
 
         # Initialize FastAPI app
         self.app = FastAPI(
@@ -50,25 +53,18 @@ class QuizAPI:
     @asynccontextmanager
     async def lifespan(self, app):
         try:
-            app.mongodb_client = AsyncIOMotorClient(
-                self.MONGODB_URL or "mongodb://localhost:27017",
-                serverSelectionTimeoutMS=5000
-            )
-            # Test connection
-            await app.mongodb_client.admin.command('ping')
-            app.mongodb = app.mongodb_client[self.DB_NAME]
-            await app.mongodb.quizzes.create_index("quiz_name", unique=True)
+            # Connect to the database
+            await self.db.connect()
+            app.mongodb = self.db.database
             self.logger.info("Connected to MongoDB!")
         except Exception as e:
             self.logger.error(f"MongoDB connection error: {e}")
-            app.mongodb_client = None
             app.mongodb = None
 
         yield
 
-        if app.mongodb_client:
-            app.mongodb_client.close()
-            self.logger.info("MongoDB connection closed")
+        # Disconnect from the database
+        await self.db.disconnect()
 
     def add_routes(self):
         @self.app.get("/")
@@ -89,6 +85,10 @@ class QuizAPI:
         async def health_check():
             is_db_connected = hasattr(self.app, "mongodb_client") and self.app.mongodb_client is not None
             return {"status": "healthy", "database_connected": is_db_connected}
+
+        @self.app.get("/quizzes")
+        async def get_quizzes():
+            return await self.db.get_all_quizzes()
 
     def run(self):
         host = os.getenv("HOST", "0.0.0.0")
