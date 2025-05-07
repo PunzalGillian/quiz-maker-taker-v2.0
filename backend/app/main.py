@@ -119,4 +119,4 @@ class QuizAPI:
         uvicorn.run(self.app, host=host, port=port, reload=debug)
 
 quiz_api = QuizAPI()
-quiz_api.run()
+app = quiz_api.app
