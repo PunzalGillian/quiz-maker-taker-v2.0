@@ -2,7 +2,9 @@ import os
 import logging
 from motor.motor_asyncio import AsyncIOMotorClient
 from bson import ObjectId
+from bson.errors import InvalidId
 from dotenv import load_dotenv
+
 
 class Database:
     def __init__(self):
@@ -63,16 +65,28 @@ class Database:
         quizzes = []
         async for document in cursor:
             document["id"] = str(document["_id"])
-            del document["_id"]  
+            del document["_id"]  # Optionally remove the original _id field
             quizzes.append(document)
         return quizzes
+    
+    async def get_quiz_by_id(self, quiz_id: str):
+        """Get a quiz by ID."""
+        try:
+            # Validate and convert quiz_id to ObjectId
+            quiz_obj_id = ObjectId(quiz_id)
+        except InvalidId:
+            self.logger.error(f"Invalid ObjectId: {quiz_id}")
+            return None
 
-    async def get_quiz_by_name(self, quiz_name):
-        """Get a quiz by name."""
-        quiz = await self.quizzes_collection.find_one({"quiz_name": quiz_name})
-        if quiz:
-            quiz["id"] = str(quiz["_id"])
-        return quiz
+        try:
+            quiz = await self.quizzes_collection.find_one({"_id": quiz_obj_id})
+            if quiz:
+                quiz["id"] = str(quiz["_id"]) 
+                del quiz["_id"]  
+            return quiz
+        except Exception as e:
+            self.logger.error(f"Error getting quiz by ID {quiz_id}: {e}")
+            return None
 
     async def save_quiz(self, quiz_data):
         """Save a quiz to the database."""
@@ -87,10 +101,17 @@ class Database:
     async def get_quiz_by_id(self, quiz_id):
         """Get a quiz by ID."""
         try:
+            # Validate and convert quiz_id to ObjectId
             quiz_obj_id = ObjectId(quiz_id)
+        except InvalidId:
+            self.logger.error(f"Invalid ObjectId: {quiz_id}")
+            return None
+
+        try:
             quiz = await self.quizzes_collection.find_one({"_id": quiz_obj_id})
             if quiz:
-                quiz["id"] = str(quiz["_id"])
+                quiz["id"] = str(quiz["_id"])  # Convert ObjectId to string
+                del quiz["_id"]  # Optionally remove the original _id field
             return quiz
         except Exception as e:
             self.logger.error(f"Error getting quiz by ID {quiz_id}: {e}")

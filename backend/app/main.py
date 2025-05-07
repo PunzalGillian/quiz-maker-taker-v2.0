@@ -1,7 +1,7 @@
 import os
 import logging
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from typing import List
@@ -93,6 +93,14 @@ class QuizAPI:
         @self.app.get("/quizzes")
         async def get_quizzes():
             return await self.db.get_all_quizzes()
+
+        @self.app.get("/quizzes/id/{quiz_id}")
+        async def get_quiz_by_id(quiz_id: str):
+            """Fetch a quiz by its ID."""
+            quiz = await self.db.get_quiz_by_id(quiz_id)
+            if not quiz:
+                raise HTTPException(status_code=404, detail="Quiz not found")
+            return quiz
 
         @self.app.post("/quizzes/save")
         async def save_quiz(quiz_name: str, questions: List[dict]):
