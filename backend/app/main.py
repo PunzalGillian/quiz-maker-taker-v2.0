@@ -111,6 +111,7 @@ class QuizAPI:
         @self.app.post("/quizzes")
         async def create_quiz(quiz: Dict):
             """Create a new quiz."""
+            self.logger.info(f"Received quiz: {quiz}")
             try:
                 # Save the quiz to the database
                 inserted_id = await self.db.save_quiz(quiz)
