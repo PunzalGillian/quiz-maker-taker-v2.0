@@ -4,8 +4,10 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
+from typing import List
 from .routes.quizzes import router as quiz_router
 from .database import Database
+from .utils import QuizFileManager
 
 
 class QuizAPI:
@@ -23,6 +25,9 @@ class QuizAPI:
 
         # Initialize database
         self.db = Database()
+
+        # Initialize file manager
+        self.file_manager = QuizFileManager()
 
         # Initialize FastAPI app
         self.app = FastAPI(
@@ -77,7 +82,9 @@ class QuizAPI:
                     "GET /quizzes/id/{quiz_id}": "Get quiz details by ID",
                     "POST /quizzes": "Create a new quiz",
                     "POST /quizzes/{quiz_name}/submit": "Submit answers and get results",
-                    "DELETE /quizzes/{quiz_name}": "Delete a quiz"
+                    "DELETE /quizzes/{quiz_name}": "Delete a quiz",
+                    "POST /quizzes/save": "Save a quiz to a file",
+                    "GET /quizzes/load/{quiz_name}": "Load a quiz from a file"
                 }
             }
 
@@ -89,6 +96,18 @@ class QuizAPI:
         @self.app.get("/quizzes")
         async def get_quizzes():
             return await self.db.get_all_quizzes()
+
+        @self.app.post("/quizzes/save")
+        async def save_quiz(quiz_name: str, questions: List[dict]):
+            file_path = self.file_manager.save_quiz(quiz_name, questions)
+            return {"message": f"Quiz saved to {file_path}"}
+
+        @self.app.get("/quizzes/load/{quiz_name}")
+        async def load_quiz(quiz_name: str):
+            quiz_data = self.file_manager.load_quiz(quiz_name)
+            if not quiz_data:
+                return {"error": "Quiz not found"}, 404
+            return {"quiz": quiz_data}
 
     def run(self):
         host = os.getenv("HOST", "0.0.0.0")
