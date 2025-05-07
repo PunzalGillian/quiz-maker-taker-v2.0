@@ -40,10 +40,7 @@ class QuizAPI:
         # Add CORS middleware
         self.app.add_middleware(
             CORSMiddleware,
-            allow_origins=[
-                "http://localhost:5173",
-                "https://your-deployed-frontend.com",
-            ],
+            allow_origins=["https://quiz-creator-v2.netlify.app/"],
             allow_credentials=True,
             allow_methods=["*"],
             allow_headers=["*"],

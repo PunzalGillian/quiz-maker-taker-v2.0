@@ -63,6 +63,7 @@ class Database:
         quizzes = []
         async for document in cursor:
             document["id"] = str(document["_id"])
+            del document["_id"]  
             quizzes.append(document)
         return quizzes
 
