@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-from typing import List
+from typing import List, Dict
 from .routes.quizzes import router as quiz_router
 from .database import Database
 from .utils import QuizFileManager
@@ -103,6 +103,17 @@ class QuizAPI:
             if not quiz:
                 raise HTTPException(status_code=404, detail="Quiz not found")
             return quiz
+
+        @self.app.post("/quizzes")
+        async def create_quiz(quiz: Dict):
+            """Create a new quiz."""
+            try:
+                # Save the quiz to the database
+                inserted_id = await self.db.save_quiz(quiz)
+                return {"message": "Quiz created successfully", "id": str(inserted_id)}
+            except Exception as e:
+                self.logger.error(f"Error creating quiz: {e}")
+                raise HTTPException(status_code=500, detail="Failed to create quiz")
 
         @self.app.post("/quizzes/save")
         async def save_quiz(quiz_name: str, questions: List[dict]):

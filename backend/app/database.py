@@ -88,10 +88,14 @@ class Database:
             self.logger.error(f"Error getting quiz by ID {quiz_id}: {e}")
             return None
 
-    async def save_quiz(self, quiz_data):
+    async def save_quiz(self, quiz_data: dict):
         """Save a quiz to the database."""
-        result = await self.quizzes_collection.insert_one(quiz_data)
-        return result.inserted_id
+        try:
+            result = await self.quizzes_collection.insert_one(quiz_data)
+            return result.inserted_id
+        except Exception as e:
+            self.logger.error(f"Error saving quiz: {e}")
+            raise
 
     async def delete_quiz(self, quiz_name):
         """Delete a quiz by name."""
