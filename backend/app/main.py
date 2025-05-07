@@ -10,16 +10,46 @@ from .routes.quizzes import router as quiz_router
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 
-# Configure logging
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
+class QuizAPI(self):
+    def__init__(self):
+        # Configure logging
+        self.logger = logging.getLogger(__name__)
+        logging.basicConfig(level=logging.INFO)
 
-# Load environment variables
-load_dotenv()
+        # Load environment variables
+        load_dotenv()
 
-# MongoDB connection settings
-MONGODB_URL = os.getenv("MONGODB_URL")
-DB_NAME = os.getenv("DB_NAME", "quizzes_db")
+        # MongoDB connection settings
+        self.MONGODB_URL = os.getenv("MONGODB_URL")
+        self.DB_NAME = os.getenv("DB_NAME", "quizzes_db")
+
+        # Create FastAPI app with lifespan
+        self.app = FastAPI(
+            title="Quiz API",
+            description="API for creating and taking quizzes",
+            version="1.0.0",
+            lifespan=lifespan
+        )
+
+        # Add CORS middleware
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=[
+                "http://localhost:5173",  
+                "https://your-deployed-frontend.com",  # Add any other URLs
+                "*"  # Or use this during development to allow all origins
+            ],
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+
+        # Include routers
+        app.include_router(quiz_router)
+
+        # Add routes
+        self.add_routes()
+
 
 # Define lifespan context manager
 @asynccontextmanager
@@ -46,29 +76,6 @@ async def lifespan(app):
         app.mongodb_client.close()
         logger.info("MongoDB connection closed")
 
-# Create FastAPI app with lifespan
-app = FastAPI(
-    title="Quiz API",
-    description="API for creating and taking quizzes",
-    version="1.0.0",
-    lifespan=lifespan
-)
-
-# Add CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",  
-        "https://your-deployed-frontend.com",  # Add any other URLs
-        "*"  # Or use this during development to allow all origins
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Include routers
-app.include_router(quiz_router)
 
 @app.get("/")
 async def root():
