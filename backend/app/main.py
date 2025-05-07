@@ -1,17 +1,15 @@
 import os
-import sys
 import logging
 from motor.motor_asyncio import AsyncIOMotorClient
-from bson import ObjectId
 from dotenv import load_dotenv
 from fastapi import FastAPI
-import uvicorn
-from .routes.quizzes import router as quiz_router
-from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
+from .routes.quizzes import router as quiz_router
 
-class QuizAPI(self):
-    def__init__(self):
+
+class QuizAPI:
+    def __init__(self):
         # Configure logging
         self.logger = logging.getLogger(__name__)
         logging.basicConfig(level=logging.INFO)
@@ -23,21 +21,20 @@ class QuizAPI(self):
         self.MONGODB_URL = os.getenv("MONGODB_URL")
         self.DB_NAME = os.getenv("DB_NAME", "quizzes_db")
 
-        # Create FastAPI app with lifespan
+        # Initialize FastAPI app
         self.app = FastAPI(
             title="Quiz API",
             description="API for creating and taking quizzes",
             version="1.0.0",
-            lifespan=lifespan
+            lifespan=self.lifespan
         )
 
         # Add CORS middleware
-        app.add_middleware(
+        self.app.add_middleware(
             CORSMiddleware,
             allow_origins=[
-                "http://localhost:5173",  
-                "https://your-deployed-frontend.com",  # Add any other URLs
-                "*"  # Or use this during development to allow all origins
+                "http://localhost:5173",
+                "https://your-deployed-frontend.com",
             ],
             allow_credentials=True,
             allow_methods=["*"],
@@ -45,32 +42,30 @@ class QuizAPI(self):
         )
 
         # Include routers
-        app.include_router(quiz_router)
+        self.app.include_router(quiz_router)
 
         # Add routes
         self.add_routes()
 
-    # Define lifespan context manager
     @asynccontextmanager
     async def lifespan(self, app):
         try:
             app.mongodb_client = AsyncIOMotorClient(
                 self.MONGODB_URL or "mongodb://localhost:27017",
-                serverSelectionTimeoutMS=5000  # Add timeout
+                serverSelectionTimeoutMS=5000
             )
             # Test connection
             await app.mongodb_client.admin.command('ping')
-            app.mongodb = app.mongodb_client[self, DB_NAME]
+            app.mongodb = app.mongodb_client[self.DB_NAME]
             await app.mongodb.quizzes.create_index("quiz_name", unique=True)
             self.logger.info("Connected to MongoDB!")
         except Exception as e:
             self.logger.error(f"MongoDB connection error: {e}")
-            # Still allow the app to start without MongoDB
             app.mongodb_client = None
             app.mongodb = None
-        
+
         yield
-        
+
         if app.mongodb_client:
             app.mongodb_client.close()
             self.logger.info("MongoDB connection closed")
@@ -92,19 +87,20 @@ class QuizAPI(self):
 
         @self.app.get("/health")
         async def health_check():
-            # Check if MongoDB is connected
             is_db_connected = hasattr(self.app, "mongodb_client") and self.app.mongodb_client is not None
             return {"status": "healthy", "database_connected": is_db_connected}
-        
+
     def run(self):
         host = os.getenv("HOST", "0.0.0.0")
         port = int(os.getenv("PORT", "8000"))
         debug = os.getenv("DEBUG", "False").lower() == "true"
-        
-        # Run the app directly
+
+        # Run the app
         import uvicorn
-        uvicorn.run(app, host=host, port=port, reload=debug)
+        uvicorn.run(self.app, host=host, port=port, reload=debug)
+
 
 if __name__ == "__main__":
+    # Instantiate and run the QuizAPI
     quiz_api = QuizAPI()
     quiz_api.run()
