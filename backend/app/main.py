@@ -50,58 +50,61 @@ class QuizAPI(self):
         # Add routes
         self.add_routes()
 
+    # Define lifespan context manager
+    @asynccontextmanager
+    async def lifespan(self, app):
+        try:
+            app.mongodb_client = AsyncIOMotorClient(
+                self.MONGODB_URL or "mongodb://localhost:27017",
+                serverSelectionTimeoutMS=5000  # Add timeout
+            )
+            # Test connection
+            await app.mongodb_client.admin.command('ping')
+            app.mongodb = app.mongodb_client[self, DB_NAME]
+            await app.mongodb.quizzes.create_index("quiz_name", unique=True)
+            self.logger.info("Connected to MongoDB!")
+        except Exception as e:
+            self.logger.error(f"MongoDB connection error: {e}")
+            # Still allow the app to start without MongoDB
+            app.mongodb_client = None
+            app.mongodb = None
+        
+        yield
+        
+        if app.mongodb_client:
+            app.mongodb_client.close()
+            self.logger.info("MongoDB connection closed")
 
-# Define lifespan context manager
-@asynccontextmanager
-async def lifespan(app):
-    try:
-        app.mongodb_client = AsyncIOMotorClient(
-            MONGODB_URL or "mongodb://localhost:27017",
-            serverSelectionTimeoutMS=5000  # Add timeout
-        )
-        # Test connection
-        await app.mongodb_client.admin.command('ping')
-        app.mongodb = app.mongodb_client[DB_NAME]
-        await app.mongodb.quizzes.create_index("quiz_name", unique=True)
-        logger.info("Connected to MongoDB!")
-    except Exception as e:
-        logger.error(f"MongoDB connection error: {e}")
-        # Still allow the app to start without MongoDB
-        app.mongodb_client = None
-        app.mongodb = None
-    
-    yield
-    
-    if app.mongodb_client:
-        app.mongodb_client.close()
-        logger.info("MongoDB connection closed")
+    def add_routes(self):
+        @self.app.get("/")
+        async def root():
+            return {
+                "message": "Quiz API is running with MongoDB",
+                "endpoints": {
+                    "GET /quizzes": "List all available quizzes",
+                    "GET /quizzes/name/{quiz_name}": "Get quiz details by name",
+                    "GET /quizzes/id/{quiz_id}": "Get quiz details by ID",
+                    "POST /quizzes": "Create a new quiz",
+                    "POST /quizzes/{quiz_name}/submit": "Submit answers and get results",
+                    "DELETE /quizzes/{quiz_name}": "Delete a quiz"
+                }
+            }
 
-
-@app.get("/")
-async def root():
-    return {
-        "message": "Quiz API is running with MongoDB",
-        "endpoints": {
-            "GET /quizzes": "List all available quizzes",
-            "GET /quizzes/name/{quiz_name}": "Get quiz details by name",
-            "GET /quizzes/id/{quiz_id}": "Get quiz details by ID",
-            "POST /quizzes": "Create a new quiz",
-            "POST /quizzes/{quiz_name}/submit": "Submit answers and get results",
-            "DELETE /quizzes/{quiz_name}": "Delete a quiz"
-        }
-    }
-
-@app.get("/health")
-async def health_check():
-    # Check if MongoDB is connected
-    is_db_connected = hasattr(app, "mongodb_client") and app.mongodb_client is not None
-    return {"status": "healthy", "database_connected": is_db_connected}
+        @self.app.get("/health")
+        async def health_check():
+            # Check if MongoDB is connected
+            is_db_connected = hasattr(self.app, "mongodb_client") and self.app.mongodb_client is not None
+            return {"status": "healthy", "database_connected": is_db_connected}
+        
+    def run(self):
+        host = os.getenv("HOST", "0.0.0.0")
+        port = int(os.getenv("PORT", "8000"))
+        debug = os.getenv("DEBUG", "False").lower() == "true"
+        
+        # Run the app directly
+        import uvicorn
+        uvicorn.run(app, host=host, port=port, reload=debug)
 
 if __name__ == "__main__":
-    host = os.getenv("HOST", "0.0.0.0")
-    port = int(os.getenv("PORT", "8000"))
-    debug = os.getenv("DEBUG", "False").lower() == "true"
-    
-    # Run the app directly
-    import uvicorn
-    uvicorn.run(app, host=host, port=port, reload=debug)
+    quiz_api = QuizAPI()
+    quiz_api.run()
