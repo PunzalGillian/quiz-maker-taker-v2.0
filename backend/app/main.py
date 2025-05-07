@@ -42,7 +42,10 @@ class QuizAPI:
 
         self.app.add_middleware(
             CORSMiddleware,
-            allow_origins=allow_origins,
+            allow_origins=[
+                "https://quiz-creator-v2.netlify.app",
+                "http://localhost:5173",
+            ],
             allow_credentials=True,
             allow_methods=["*"],
             allow_headers=["*"],
@@ -89,7 +92,8 @@ class QuizAPI:
 
         @self.app.get("/health")
         async def health_check():
-            is_db_connected = hasattr(self.app, "mongodb_client") and self.app.mongodb_client is not None
+            is_db_connected = hasattr(
+                self.app, "mongodb_client") and self.app.mongodb_client is not None
             return {"status": "healthy", "database_connected": is_db_connected}
 
         @self.app.get("/quizzes")
@@ -113,7 +117,8 @@ class QuizAPI:
                 return {"message": "Quiz created successfully", "id": str(inserted_id)}
             except Exception as e:
                 self.logger.error(f"Error creating quiz: {e}")
-                raise HTTPException(status_code=500, detail="Failed to create quiz")
+                raise HTTPException(
+                    status_code=500, detail="Failed to create quiz")
 
         @self.app.post("/quizzes/save")
         async def save_quiz(quiz_name: str, questions: List[dict]):
@@ -135,6 +140,7 @@ class QuizAPI:
         # Run the app
         import uvicorn
         uvicorn.run(self.app, host=host, port=port, reload=debug)
+
 
 quiz_api = QuizAPI()
 app = quiz_api.app
