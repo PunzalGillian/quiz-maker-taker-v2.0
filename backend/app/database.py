@@ -102,6 +102,18 @@ class Database:
         result = await self.quizzes_collection.delete_one({"quiz_name": quiz_name})
         return result.deleted_count > 0
 
+    async def get_quiz_by_name(self, quiz_name: str):
+        """Get a quiz by its name."""
+        try:
+            quiz = await self.quizzes_collection.find_one({"quiz_name": quiz_name})
+            if quiz:
+                quiz["id"] = str(quiz["_id"])  # Convert ObjectId to string
+                del quiz["_id"]  # Optionally remove the original _id field
+            return quiz
+        except Exception as e:
+            self.logger.error(f"Error fetching quiz by name '{quiz_name}': {e}")
+            return None
+    
     async def get_quiz_by_id(self, quiz_id):
         """Get a quiz by ID."""
         try:
