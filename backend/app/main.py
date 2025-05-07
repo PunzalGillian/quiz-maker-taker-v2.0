@@ -118,8 +118,5 @@ class QuizAPI:
         import uvicorn
         uvicorn.run(self.app, host=host, port=port, reload=debug)
 
-
-if __name__ == "__main__":
-    # Instantiate and run the QuizAPI
-    quiz_api = QuizAPI()
-    quiz_api.run()
+quiz_api = QuizAPI()
+quiz_api.run()
