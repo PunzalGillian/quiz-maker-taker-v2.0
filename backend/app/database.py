@@ -5,40 +5,49 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from bson import ObjectId
 from dotenv import load_dotenv
 
-# Configure logging
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
+class DatabaseManager:
+    def __init__(self):
+        self.configure_logging()
+        self.load_environment()
+        self.initialize_database()
 
-# Load environment variables
-load_dotenv()
+    def configure_logging(self):
+        # Configure logging
+        self.logger = logging.getLogger(__name__)
+        logging.basicConfig(level=logging.INFO)
 
-# MongoDB connection settings
-MONGODB_URL = os.getenv("MONGODB_URL")
-DB_NAME = os.getenv("DB_NAME", "quizzes_db")
+    def load_environment(self):
+        # Load environment variables
+        load_dotenv()
 
-# Verify MongoDB URL exists
-if not MONGODB_URL:
-    logger.error("MONGODB_URL not found in .env file!")
-    logger.error("Please configure MONGODB_URL in your .env file")
-    sys.exit(1)
+        # MongoDB connection settings
+        self.MONGODB_URL = os.getenv("MONGODB_URL")
+        self.DB_NAME = os.getenv("DB_NAME", "quizzes_db")
+                
+        # Verify MongoDB URL exists
+        if not self.MONGODB_URL:
+            self.logger.error("MONGODB_URL not found in .env file!")
+            self.logger.error("Please configure MONGODB_URL in your .env file")
+            sys.exit(1)
 
-try:
-    # Create MongoDB client with a timeout
-    client = AsyncIOMotorClient(MONGODB_URL, serverSelectionTimeoutMS=5000)
-    database = client[DB_NAME]
-    
-    # Collection references
-    quizzes_collection = database.quizzes
-    
-    # Log connection information (without exposing credentials)
-    connection_url_parts = MONGODB_URL.split('@')
-    if len(connection_url_parts) > 1:
-        # Hide username and password in logs
-        safe_url = f"mongodb+srv://****:****@{connection_url_parts[1]}"
-    else:
-        safe_url = MONGODB_URL
-    logger.info(f"MongoDB configured with: {safe_url}")
-    
+    def initialize_database(self):
+        try:
+            # Create MongoDB client with a timeout
+            self.client = AsyncIOMotorClient(self.MONGODB_URL, serverSelectionTimeoutMS=5000)
+            self.database = self.client[DB_NAME]
+            
+            # Collection references
+            self.quizzes_collection = self.database.quizzes
+            safe_url =
+            # Log connection information (without exposing credentials)
+            connection_url_parts = MONGODB_URL.split('@')
+            if len(connection_url_parts) > 1:
+                # Hide username and password in logs
+                safe_url = f"mongodb+srv://****:****@{connection_url_parts[1]}"
+            else:
+                safe_url = MONGODB_URL
+            logger.info(f"MongoDB configured with: {safe_url}")
+            
 except Exception as e:
     logger.error(f"Failed to initialize MongoDB connection: {e}")
     # Re-raise to make initialization failures obvious
