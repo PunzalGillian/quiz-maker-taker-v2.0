@@ -1,34 +1,57 @@
 import random
 from copy import deepcopy
 import logging
-from typing import Dict, Any
+from typing import Dict, Any, List
+from abc import ABC, abstractmethod
 from bson import ObjectId
 
 logger = logging.getLogger(__name__)
 
 
-def shuffle_quiz(quiz_data: Dict[str, Any], shuffle_questions: bool = True, shuffle_options: bool = True) -> Dict[str, Any]:
-    """Shuffles quiz questions and options."""
-    logger.info(
-        f"Shuffling quiz: questions={shuffle_questions}, options={shuffle_options}")
+class QuizShuffler:
+    """Class responsible for shuffling quiz questions and options"""
 
-    # Make a deep copy to avoid modifying the original
-    result = deepcopy(quiz_data)
+    def __init__(self, shuffle_questions: bool = True, shuffle_options: bool = True):
+        """Initialize with shuffling preferences"""
+        self._shuffle_questions = shuffle_questions
+        self._shuffle_options = shuffle_options
 
-    # If _id is still in the dict (not removed earlier), convert to string
-    if "_id" in result and isinstance(result["_id"], ObjectId):
-        result["id"] = str(result["_id"])
-        del result["_id"]
+    def shuffle(self, quiz_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Shuffles quiz questions and options."""
+        logger.info(
+            f"Shuffling quiz: questions={self._shuffle_questions}, options={self._shuffle_options}")
 
-    # Check if quiz has questions
-    if 'questions' not in result or not result['questions']:
-        logger.warning("Quiz has no questions to shuffle")
+        # Make a deep copy to avoid modifying the original
+        result = deepcopy(quiz_data)
+
+        # Convert ObjectId to string if present
+        self._handle_object_id(result)
+
+        # Check if quiz has questions
+        if 'questions' not in result or not result['questions']:
+            logger.warning("Quiz has no questions to shuffle")
+            return result
+
+        questions = result['questions']
+
+        # Shuffle questions if requested
+        if self._shuffle_questions:
+            self._shuffle_questions_list(questions)
+
+        # Shuffle options if requested
+        if self._shuffle_options:
+            self._shuffle_options_in_questions(questions)
+
         return result
 
-    questions = result['questions']
+    def _handle_object_id(self, quiz_data: Dict[str, Any]) -> None:
+        """Convert MongoDB ObjectId to string ID"""
+        if "_id" in quiz_data and isinstance(quiz_data["_id"], ObjectId):
+            quiz_data["id"] = str(quiz_data["_id"])
+            del quiz_data["_id"]
 
-    # Log original question order
-    if shuffle_questions:
+    def _shuffle_questions_list(self, questions: List[Dict]) -> None:
+        """Shuffle the list of questions"""
         logger.info(
             f"Original question order: {[q.get('question_text', '')[:20] for q in questions[:3]]}...")
 
@@ -39,8 +62,8 @@ def shuffle_quiz(quiz_data: Dict[str, Any], shuffle_questions: bool = True, shuf
         logger.info(
             f"New question order: {[q.get('question_text', '')[:20] for q in questions[:3]]}...")
 
-    # Shuffle options if requested
-    if shuffle_options:
+    def _shuffle_options_in_questions(self, questions: List[Dict]) -> None:
+        """Shuffle options within each question and update correct answer"""
         for i, question in enumerate(questions):
             try:
                 # Skip questions without required fields
@@ -92,4 +115,9 @@ def shuffle_quiz(quiz_data: Dict[str, Any], shuffle_questions: bool = True, shuf
             except Exception as e:
                 logger.error(f"Error shuffling options for question {i}: {e}")
 
-    return result
+
+# For backward compatibility
+def shuffle_quiz(quiz_data: Dict[str, Any], shuffle_questions: bool = True, shuffle_options: bool = True) -> Dict[str, Any]:
+    """Legacy function that maintains the original interface"""
+    shuffler = QuizShuffler(shuffle_questions, shuffle_options)
+    return shuffler.shuffle(quiz_data)
