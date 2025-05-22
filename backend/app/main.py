@@ -20,16 +20,17 @@ load_dotenv()
 
 class QuizApp:
     """Main Quiz API application class"""
-    
+
     def __init__(self):
         """Initialize the Quiz application"""
         # Load configuration
-        self._mongodb_url = os.getenv("MONGODB_URL", "mongodb://localhost:27017")
+        self._mongodb_url = os.getenv(
+            "MONGODB_URL", "mongodb://localhost:27017")
         self._db_name = os.getenv("DB_NAME")
         self._host = os.getenv("HOST", "0.0.0.0")
         self._port = int(os.getenv("PORT", "8000"))
         self._debug = os.getenv("DEBUG", "False").lower() == "true"
-        
+
         # Create FastAPI app
         self.app = FastAPI(
             title="Quiz API",
@@ -37,12 +38,12 @@ class QuizApp:
             version="1.0.0",
             lifespan=self._lifespan
         )
-        
+
         # Configure app
         self._setup_cors()
         self._setup_routes()
         self._setup_endpoints()
-    
+
     @asynccontextmanager
     async def _lifespan(self, app):
         """Lifespan context manager for database connections"""
@@ -67,7 +68,7 @@ class QuizApp:
         if app.mongodb_client:
             app.mongodb_client.close()
             logger.info("MongoDB connection closed")
-    
+
     def _setup_cors(self):
         """Set up CORS middleware"""
         self.app.add_middleware(
@@ -82,14 +83,14 @@ class QuizApp:
             allow_methods=["*"],
             allow_headers=["*"],
         )
-    
+
     def _setup_routes(self):
         """Set up API routes"""
         self.app.include_router(quiz_router)
-    
+
     def _setup_endpoints(self):
         """Set up basic API endpoints"""
-        
+
         @self.app.get("/")
         async def root():
             return {
@@ -100,23 +101,21 @@ class QuizApp:
                     "GET /quizzes/id/{quiz_id}": "Get quiz details by ID",
                     "POST /quizzes": "Create a new quiz",
                     "POST /quizzes/{quiz_name}/submit": "Submit answers and get results",
-                    "DELETE /quizzes/{quiz_name}": "Delete a quiz"
-                }
-            }
-        
+                    "DELETE /quizzes/{quiz_name}": "Delete a quiz"}}
+
         @self.app.get("/health")
         async def health_check():
             # Check if MongoDB is connected
             is_db_connected = hasattr(
                 self.app, "mongodb_client") and self.app.mongodb_client is not None
             return {"status": "healthy", "database_connected": is_db_connected}
-    
+
     def run(self):
         """Run the application"""
         uvicorn.run(
-            self.app, 
-            host=self._host, 
-            port=self._port, 
+            self.app,
+            host=self._host,
+            port=self._port,
             reload=self._debug
         )
 

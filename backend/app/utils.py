@@ -61,7 +61,8 @@ class QuizFileManager:
                 question_block += f"b) {question.option_b}\n"
                 question_block += f"c) {question.option_c}\n"
                 question_block += f"d) {question.option_d}\n"
-                question_block += f"Correct answer: {question.correct_answer}\n\n"
+                question_block += f"Correct answer: {
+                    question.correct_answer}\n\n"
                 file.write(question_block)
 
         return quiz_file
