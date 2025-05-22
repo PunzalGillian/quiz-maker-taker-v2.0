@@ -140,7 +140,8 @@ class QuizShuffler:
     def shuffle(self, quiz_data: Dict[str, Any]) -> Dict[str, Any]:
         """Shuffles quiz questions and options"""
         # Fix the broken f-string
-        logger.info(f"Shuffling quiz: questions={self._shuffle_questions}, options={self._shuffle_options}")
+        logger.info(
+            f"Shuffling quiz: questions={self._shuffle_questions}, options={self._shuffle_options}")
 
         # Make a deep copy to avoid modifying the original
         result = deepcopy(quiz_data)
@@ -178,7 +179,8 @@ def shuffle_quiz(
     shuffle_options: bool = True
 ) -> Dict[str, Any]:
     """Legacy function that maintains the original interface"""
-    logger.debug(f"shuffle_quiz called with: shuffle_questions={shuffle_questions}, shuffle_options={shuffle_options}")
+    logger.debug(
+        f"shuffle_quiz called with: shuffle_questions={shuffle_questions}, shuffle_options={shuffle_options}")
 
     # Check quiz structure
     if 'questions' in quiz_data:
@@ -193,6 +195,7 @@ def shuffle_quiz(
 
     # Verify shuffling
     if 'questions' in result:
-        logger.debug(f"Quiz has {len(result['questions'])} questions after shuffling")
+        logger.debug(
+            f"Quiz has {len(result['questions'])} questions after shuffling")
 
     return result
