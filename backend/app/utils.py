@@ -61,8 +61,7 @@ class QuizFileManager:
                 question_block += f"b) {question.option_b}\n"
                 question_block += f"c) {question.option_c}\n"
                 question_block += f"d) {question.option_d}\n"
-                question_block += f"Correct answer: {
-                    question.correct_answer}\n\n"
+                question_block += f"Correct answer: {question.correct_answer}\n\n"
                 file.write(question_block)
 
         return quiz_file
@@ -77,6 +76,10 @@ class QuizFileManager:
         with open(quiz_file, "r") as file:
             content = file.read()
 
+        return self._parse_quiz_content(content)
+
+    def _parse_quiz_content(self, content: str) -> List[Dict]:
+        """Parse quiz content into structured questions."""
         parsed_questions = []
         question_blocks = content.strip().split("\n\n")
 
@@ -99,3 +102,26 @@ class QuizFileManager:
             })
 
         return parsed_questions
+
+
+# Create instances for use throughout the application
+mongodb_json_serializer = MongoDBJSONSerializer()
+quiz_file_manager = QuizFileManager()
+
+
+# For backward compatibility with code expecting the mongodb_response function
+def mongodb_response(data: Any) -> JSONResponse:
+    """Backward compatibility function for MongoDB document serialization."""
+    return mongodb_json_serializer.serialize(data)
+
+
+# For backward compatibility with code expecting the save_quiz function
+def save_quiz(quiz_name: str, questions: List[Question]) -> str:
+    """Backward compatibility function for saving a quiz."""
+    return quiz_file_manager.save_quiz(quiz_name, questions)
+
+
+# For backward compatibility with code expecting the load_quiz function
+def load_quiz(quiz_name: str) -> Optional[List[Dict]]:
+    """Backward compatibility function for loading a quiz."""
+    return quiz_file_manager.load_quiz(quiz_name)
