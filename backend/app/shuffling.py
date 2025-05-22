@@ -11,7 +11,10 @@ logger = logging.getLogger(__name__)
 class QuizShuffler:
     """Class responsible for shuffling quiz questions and options"""
 
-    def __init__(self, shuffle_questions: bool = True, shuffle_options: bool = True):
+    def __init__(
+            self,
+            shuffle_questions: bool = True,
+            shuffle_options: bool = True):
         """Initialize with shuffling preferences"""
         self._shuffle_questions = shuffle_questions
         self._shuffle_options = shuffle_options
@@ -19,7 +22,9 @@ class QuizShuffler:
     def shuffle(self, quiz_data: Dict[str, Any]) -> Dict[str, Any]:
         """Shuffles quiz questions and options."""
         logger.info(
-            f"Shuffling quiz: questions={self._shuffle_questions}, options={self._shuffle_options}")
+            f"Shuffling quiz: questions={
+                self._shuffle_questions}, options={
+                self._shuffle_options}")
 
         # Make a deep copy to avoid modifying the original
         result = deepcopy(quiz_data)
@@ -117,7 +122,11 @@ class QuizShuffler:
 
 
 # For backward compatibility
-def shuffle_quiz(quiz_data: Dict[str, Any], shuffle_questions: bool = True, shuffle_options: bool = True) -> Dict[str, Any]:
+def shuffle_quiz(quiz_data: Dict[str,
+                                 Any],
+                 shuffle_questions: bool = True,
+                 shuffle_options: bool = True) -> Dict[str,
+                                                       Any]:
     """Legacy function that maintains the original interface"""
     shuffler = QuizShuffler(shuffle_questions, shuffle_options)
     return shuffler.shuffle(quiz_data)
